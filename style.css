@@ -1,0 +1,1075 @@
+:root {
+    /* Warm Fantasy Viking Palette */
+    --color-bg-dark: #120b08;
+    --color-wood-dark: #3e2723;
+    --color-wood-mid: #5d4037;
+    --color-wood-light: #8d6e63;
+    --color-wood-pale: #bcaaa4;
+
+    --color-gold: #ffb74d;
+    --color-gold-dim: #f57f17;
+    --color-gold-glow: rgba(255, 183, 77, 0.6);
+
+    --color-ember: #ff5722;
+    --color-ember-glow: rgba(255, 87, 34, 0.5);
+
+    --color-attacker: #212121;
+    --color-defender: #fff8e1;
+
+    --shadow-depth: 0 10px 20px rgba(0, 0, 0, 0.7);
+    --shadow-inner: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+
+    /* Fonts */
+    --font-heading: 'MedievalSharp', cursive;
+    --font-body: 'Cinzel', serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--color-bg-dark);
+    color: var(--color-wood-pale);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Full page wood texture (Table) */
+    background-image: url('wood.png');
+    background-size: cover;
+    background-attachment: fixed;
+    /* Darken the background slightly to make board pop */
+    background-color: #3e2723;
+    background-blend-mode: multiply;
+    overflow-x: hidden;
+}
+
+/* Background Atmosphere - Animated Embers (Simulated) */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        radial-gradient(circle at 20% 80%, rgba(255, 87, 34, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 80% 20%, rgba(255, 183, 77, 0.05) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+.game-container {
+    max-width: 1200px;
+    width: 100%;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.game-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+    padding-bottom: 1rem;
+    width: 100%;
+}
+
+.game-header::after {
+    content: "";
+    display: block;
+    width: 200px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+    margin: 10px auto 0;
+}
+
+h1 {
+    font-family: var(--font-heading);
+    font-size: 3.5rem;
+    color: var(--color-gold);
+    text-shadow:
+        0 2px 0 #000,
+        0 0 10px var(--color-ember-glow),
+        0 0 20px var(--color-ember-glow);
+    margin-bottom: 0.5rem;
+    letter-spacing: 2px;
+}
+
+.turn-indicator {
+    font-size: 1.3rem;
+    background: rgba(20, 10, 5, 0.7);
+    padding: 0.8rem 2rem;
+    border-radius: 50px;
+    border: 1px solid var(--color-wood-highlight);
+    border-image: linear-gradient(45deg, var(--color-wood-dark), var(--color-gold-dim)) 1;
+    display: inline-block;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+}
+
+#current-player {
+    font-weight: bold;
+    color: var(--color-gold);
+    text-transform: uppercase;
+    text-shadow: 0 0 8px var(--color-gold-glow);
+}
+
+.main-content {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.game-board-container {
+    position: relative;
+    padding: 40px;
+    /* More space for runes */
+
+    /* Natural Light Wood Effect */
+    background-color: #d7ccc8;
+    /* Light beige/wood base */
+    background-image: url('wood.png');
+    background-size: cover;
+    background-blend-mode: soft-light;
+    /* Blend texture softly */
+
+    border-radius: 8px;
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.9),
+        inset 0 0 20px rgba(0, 0, 0, 0.3);
+    border: 4px solid #5d4037;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Pyrographed Runes on Edges */
+.game-board-container::before,
+.game-board-container::after {
+    content: "ᚨᛉᛖᚱᛏᚢᛁᛟᛈᛊᛞᚠᚷᚺᛃᛚᛗᚹᛒᚾᚲ";
+    position: absolute;
+    color: #3e2723;
+    /* Dark burned wood color */
+    /* Light wood color */
+    font-size: 1.5rem;
+    font-family: sans-serif;
+    letter-spacing: 5px;
+    opacity: 0.8;
+    text-shadow:
+        0px 1px 0px rgba(255, 255, 255, 0.4),
+        0px -1px 0px rgba(0, 0, 0, 0.1);
+    /* Engraved/Burned look */
+    width: 100%;
+    text-align: center;
+    left: 0;
+}
+
+.game-board-container::before {
+    top: 5px;
+}
+
+.game-board-container::after {
+    bottom: 5px;
+    transform: rotate(180deg);
+    /* Flip bottom runes */
+}
+
+/* Board - Light Wood */
+.game-board {
+    display: grid;
+    grid-template-columns: repeat(11, 1fr);
+    grid-template-rows: repeat(11, 1fr);
+    width: 550px;
+    height: 550px;
+
+    /* Matching natural light wood */
+    background-color: #d7ccc8;
+    background-image: url('wood.png');
+    background-size: cover;
+    background-blend-mode: soft-light;
+
+    border: 5px solid #8d6e63;
+    background-size: cover;
+
+    border: 5px solid #8d6e63;
+    box-shadow: var(--shadow-inner);
+    position: relative;
+    z-index: 5;
+}
+
+.cell {
+    position: relative;
+    border: 1px solid rgba(0, 0, 0, 0.4);
+    background-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+/* Starting Cells - Wood Texture + Tint */
+.starting-cell {
+    background-image: url('wood.png');
+    background-size: cover;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.starting-cell.attacker-start {
+    /* Darker tint for attackers */
+    position: relative;
+}
+
+.starting-cell.attacker-start::before {
+    /* Overlay for tint */
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(20, 10, 5, 0.7);
+    /* Very dark */
+}
+
+.starting-cell.defender-start {
+    /* Lighter/Warmer tint for defenders */
+    position: relative;
+}
+
+.starting-cell.defender-start::before {
+    /* Overlay for tint */
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(141, 110, 99, 0.3);
+    /* Lighter wood */
+}
+
+/* Ensure overlay is below content */
+.starting-cell::before {
+    z-index: 0;
+}
+
+/* Ensure content is above overlay */
+.cell.starting-cell .piece,
+.cell.starting-cell::after {
+    z-index: 2;
+}
+
+/* Special squares */
+.cell.corner {
+    background-color: rgba(45, 30, 22, 0.6);
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+    overflow: hidden;
+}
+
+/* Runes Removed from Corners - kept empty if needed or just remove content */
+.cell.corner::before {
+    content: '';
+    display: none;
+}
+
+.cell.throne {
+    background-color: rgba(62, 39, 35, 0.8);
+    border: 2px solid var(--color-gold);
+}
+
+.cell.throne::before {
+    content: "ᛟ";
+    /* Othala Rune */
+    position: absolute;
+    color: rgba(255, 183, 77, 0.4);
+    font-size: 1.8rem;
+    z-index: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+/* Pieces */
+.piece {
+    width: 98%;
+    height: 98%;
+    position: relative;
+    z-index: 2;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: transform 0.1s;
+    /* Faster, simpler transition */
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.7));
+}
+
+/* Hover lift effect for pieces */
+.cell:hover .piece {
+    transform: scale(1.1);
+    filter: drop-shadow(0 5px 8px rgba(0, 0, 0, 0.6));
+}
+
+.piece.attacker {
+    background-image: url('attaquants.png');
+}
+
+.piece.attacker.elite {
+    background-image: url('attaquants1er.png');
+}
+
+.piece.defender {
+    background-image: url('defender.png');
+}
+
+.piece.king {
+    background-image: url('roi.png');
+    /* No animation */
+}
+
+
+/* Hover & Selection */
+.cell.selectable:hover {
+    background-color: rgba(255, 183, 77, 0.15);
+    box-shadow: inset 0 0 5px var(--color-gold-glow);
+}
+
+.cell.selected {
+    background-color: rgba(255, 183, 77, 0.2);
+    box-shadow: inset 0 0 15px var(--color-gold);
+    border-color: var(--color-gold);
+}
+
+/* Valid Move Marker - Rune Style */
+.cell.valid-move::after {
+    content: '';
+    display: block;
+    width: 12px;
+    height: 12px;
+    background-color: rgba(255, 183, 77, 0.6);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--color-gold);
+    transition: transform 0.2s;
+}
+
+.cell.valid-move:hover::after {
+    background-color: var(--color-gold);
+    transform: scale(1.5);
+    box-shadow: 0 0 15px var(--color-gold);
+}
+
+/* Sidebar */
+.sidebar {
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.panel {
+    background: rgba(30, 20, 15, 0.85);
+    border: 1px solid rgba(141, 110, 99, 0.3);
+    padding: 1.5rem;
+    border-radius: 6px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    position: relative;
+}
+
+/* Decorative panel corners */
+.panel::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-gold-dim), transparent);
+}
+
+.panel::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: -1px;
+    right: -1px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-gold-dim), transparent);
+}
+
+.panel h2,
+.panel h3 {
+    font-family: var(--font-heading);
+    color: var(--color-gold);
+    margin-bottom: 1rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    border-bottom: 1px solid rgba(255, 183, 77, 0.2);
+    padding-bottom: 0.5rem;
+    letter-spacing: 1px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.8rem;
+    font-size: 1.1rem;
+    color: #d7ccc8;
+}
+
+.viking-btn {
+    background: linear-gradient(180deg, #4e342e, #3e2723);
+    color: var(--color-gold);
+    border: 1px solid #5d4037;
+    border-top: 1px solid #795548;
+    padding: 1rem 1.5rem;
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+    margin-bottom: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Button Glow Effect */
+.viking-btn:hover {
+    background: linear-gradient(180deg, #5d4037, #4e342e);
+    color: #fff;
+    border-color: var(--color-gold);
+    box-shadow: 0 0 15px var(--color-ember-glow);
+    transform: translateY(-1px);
+}
+
+.viking-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.viking-btn.secondary {
+    background: transparent;
+    border: 1px solid rgba(141, 110, 99, 0.5);
+    color: #a1887f;
+}
+
+.viking-btn.secondary:hover {
+    border-color: var(--color-gold-dim);
+    color: var(--color-gold);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.history-panel ul {
+    list-style: none;
+    max-height: 150px;
+    overflow-y: auto;
+    font-size: 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.history-panel li {
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 5, 2, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    opacity: 1;
+    transition: opacity 0.3s;
+    backdrop-filter: blur(5px);
+}
+
+.modal.hidden {
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+}
+
+.modal-content {
+    background: #2e1c15;
+    border: 2px solid var(--color-gold-dim);
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), inset 0 0 30px rgba(0, 0, 0, 0.5);
+    padding: 2.5rem;
+    max-width: 600px;
+    width: 90%;
+    position: relative;
+    border-radius: 2px;
+}
+
+/* Ornamental Scroll effect */
+.modal-content::before,
+.modal-content::after {
+    content: "❖";
+    position: absolute;
+    color: var(--color-gold-dim);
+    font-size: 1.5rem;
+}
+
+.modal-content::before {
+    top: 10px;
+    left: 10px;
+}
+
+.modal-content::after {
+    top: 10px;
+    right: 10px;
+}
+
+.close-modal {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 2.5rem;
+    cursor: pointer;
+    color: var(--color-wood-pale);
+    transition: color 0.2s;
+    line-height: 0.8;
+    z-index: 200;
+    /* Ensure above decorations */
+}
+
+.close-modal:hover {
+    color: var(--color-ember);
+}
+
+.rules-text p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    color: var(--color-wood-pale);
+}
+
+.rules-text strong {
+    color: var(--color-gold);
+}
+
+.victory-content {
+    text-align: center;
+}
+
+#victory-title {
+    font-size: 3.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--color-gold);
+    text-shadow: 0 0 15px var(--color-gold-glow);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    h1 {
+        font-size: 2.5rem;
+    }
+
+    .main-content {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .game-board {
+        width: 90vw;
+        height: 90vw;
+        max-width: 550px;
+        max-height: 550px;
+    }
+
+    .sidebar {
+        width: 100%;
+        max-width: 550px;
+    }
+}
+
+/* Game Setup Modal Styles */
+.setup-section h3 {
+    font-family: var(--font-heading);
+    color: var(--color-gold);
+    font-size: 1.2rem;
+    margin-bottom: 0.8rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.mode-btn,
+.side-btn {
+    position: relative;
+    opacity: 0.7;
+    transition: all 0.3s ease;
+}
+
+.mode-btn:hover,
+.side-btn:hover {
+    opacity: 1;
+}
+
+.mode-btn.active-mode,
+.side-btn.active-side {
+    opacity: 1;
+    border: 2px solid var(--color-gold);
+    box-shadow: 0 0 20px var(--color-gold-glow);
+    transform: scale(1.02);
+}
+
+.mode-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    filter: grayscale(1);
+}
+
+#timer-enabled:checked+span {
+    color: var(--color-gold);
+    font-weight: bold;
+}
+
+#timer-duration:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.viking-select {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.viking-select:not(:disabled):hover {
+    border-color: var(--color-gold) !important;
+    box-shadow: 0 0 10px var(--color-gold-glow);
+}
+
+/* Leaderboard Styles */
+.leaderboard-panel ul {
+    list-style: none;
+    max-height: 250px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(141, 110, 99, 0.2);
+    border-radius: 4px;
+    padding: 10px;
+}
+
+.leaderboard-panel li {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 5px;
+    border-bottom: 1px solid rgba(255, 183, 77, 0.1);
+    font-size: 0.95rem;
+    color: var(--color-wood-pale);
+}
+
+.leaderboard-panel li:last-child {
+    border-bottom: none;
+}
+
+.leaderboard-panel li .rank {
+    color: var(--color-gold);
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.leaderboard-panel li .name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.leaderboard-panel li .score {
+    color: var(--color-gold);
+}
+
+.leaderboard-panel .empty-msg {
+    text-align: center;
+    font-style: italic;
+    opacity: 0.6;
+    padding: 20px 0;
+}
+
+/* Daily Challenges Panel Styles */
+.challenges-panel {
+    margin-top: 10px;
+}
+
+.challenge-item {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(141, 110, 99, 0.1);
+    border-radius: 4px;
+}
+
+.challenge-desc {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--color-gold);
+    margin-bottom: 5px;
+}
+
+.challenge-progress-bar {
+    height: 8px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.challenge-progress-bar .progress {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-gold-dim), var(--color-gold));
+    box-shadow: 0 0 10px var(--color-gold-glow);
+    transition: width 0.5s ease;
+}
+
+.challenge-stat {
+    display: block;
+    text-align: right;
+    font-size: 0.8rem;
+    color: var(--color-wood-pale);
+}
+
+.challenge-stat.status-incomplete {
+    color: var(--color-ember);
+}
+
+.challenge-stat.status-complete {
+    color: #4caf50;
+    font-weight: bold;
+}
+
+/* Score Display in Victory Modal */
+.score-display {
+    margin: 20px 0;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px dashed var(--color-gold-dim);
+    border-radius: 4px;
+}
+
+.score-label {
+    font-family: var(--font-heading);
+    color: var(--color-wood-pale);
+    font-size: 1.2rem;
+    margin-right: 15px;
+}
+
+.score-value {
+    color: var(--color-gold);
+    font-size: 2rem;
+    font-weight: bold;
+    text-shadow: 0 0 10px var(--color-gold-glow);
+}
+
+/* Scrollbar Styling for panels */
+.history-panel ul::-webkit-scrollbar,
+.leaderboard-panel ul::-webkit-scrollbar {
+    width: 6px;
+}
+
+.history-panel ul::-webkit-scrollbar-track,
+.leaderboard-panel ul::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.history-panel ul::-webkit-scrollbar-thumb,
+.leaderboard-panel ul::-webkit-scrollbar-thumb {
+    background: var(--color-wood-dark);
+    border-radius: 3px;
+}
+
+.history-panel ul::-webkit-scrollbar-thumb:hover,
+.leaderboard-panel ul::-webkit-scrollbar-thumb:hover {
+    background: var(--color-wood-mid);
+}
+
+/* Hidden elements */
+.hidden-soft {
+    display: none !important;
+}
+
+/* Toast Notifications */
+#toast-container {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.toast {
+    background: rgba(46, 28, 21, 0.95);
+    border: 1px solid var(--color-gold);
+    color: var(--color-gold);
+    padding: 12px 24px;
+    border-radius: 4px;
+    font-family: var(--font-heading);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    animation: toast-in 0.3s ease-out, toast-out 0.3s ease-in 2.7s forwards;
+    pointer-events: auto;
+    min-width: 200px;
+    text-align: center;
+}
+
+@keyframes toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes toast-out {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+/* User Profile Panel */
+.user-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+}
+
+.avatar-container {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid var(--color-gold);
+    overflow: hidden;
+    background: var(--color-bg-dark);
+    box-shadow: 0 0 10px var(--color-gold-glow);
+}
+
+.avatar-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+#user-display-name {
+    color: var(--color-gold);
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    text-shadow: 0 1px 2px black;
+}
+
+.text-link {
+    background: none;
+    border: none;
+    color: var(--color-wood-pale);
+    font-size: 0.8rem;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+    text-align: left;
+    transition: color 0.2s;
+}
+
+.text-link:hover {
+    color: var(--color-gold);
+}
+
+/* Auth Modal Specifics */
+.auth-content {
+    max-width: 450px;
+    background: linear-gradient(135deg, #2e1c15 0%, #1e120d 100%);
+}
+
+.auth-state h2 {
+    text-align: center;
+    font-size: 2.2rem;
+    margin-bottom: 25px;
+}
+
+.oauth-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.oauth-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: white;
+    color: #333;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.oauth-btn img {
+    width: 20px;
+    height: 20px;
+}
+
+.oauth-btn:hover {
+    background: #f1f1f1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.oauth-btn.microsoft {
+    background: #2f2f2f;
+    color: white;
+}
+
+.oauth-btn.microsoft:hover {
+    background: #3f3f3f;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 20px 0;
+    color: var(--color-wood-pale);
+    font-size: 0.9rem;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.divider span {
+    padding: 0 10px;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.auth-switch {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: var(--color-wood-pale);
+}
+
+.auth-switch a {
+    color: var(--color-gold);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.auth-switch a:hover {
+    text-decoration: underline;
+}
+
+/* Code Input */
+.code-input-container {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0;
+}
+
+.code-input {
+    font-size: 2rem !important;
+    letter-spacing: 15px;
+    text-align: center;
+    width: 250px !important;
+    font-family: monospace !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Profile Setup */
+.profile-pic-preview {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 20px;
+}
+
+#setup-avatar-preview {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--color-gold);
+    box-shadow: 0 0 20px var(--color-gold-glow);
+}
+
+.avatar-upload-label {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background: var(--color-gold);
+    color: black;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    border: 2px solid #2e1c15;
+    transition: transform 0.2s;
+}
+
+.avatar-upload-label:hover {
+    transform: scale(1.1);
+}
